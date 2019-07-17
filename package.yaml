@@ -1,0 +1,83 @@
+name:                cheezy-scrapings
+version:             0.1.0.0
+github:              "ebenpack/cheezy-scrapings"
+license:             MIT
+author:              "ebenpack"
+maintainer:          "ebenpackwood+github@gmail.com"
+copyright:           "2019 ebenpack"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description: Please see the README on GitHub at <https://github.com/githubuser/cheezy-scrapings#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+  ghc-options:
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+  - -O2
+  - -flate-specialise
+  - -fspecialise-aggressively
+  - -fplugin=Polysemy.Plugin
+  default-extensions:
+  - DataKinds
+  - FlexibleContexts
+  - GADTs
+  - LambdaCase
+  - PolyKinds
+  - RankNTypes
+  - ScopedTypeVariables
+  - TypeApplications
+  - TypeOperators
+  - TypeFamilies
+  - OverloadedStrings
+  dependencies:
+  - attoparsec
+  - beam-core
+  - beam-sqlite
+  - containers
+  - monad-loops
+  - polysemy
+  - polysemy-plugin
+  - scalpel
+  - sqlite-simple
+  - text
+  - time
+
+executables:
+  cheezy-scrapings-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -O2
+    - -flate-specialise
+    - -fspecialise-aggressively
+    dependencies:
+    - cheezy-scrapings
+
+tests:
+  cheezy-scrapings-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - cheezy-scrapings

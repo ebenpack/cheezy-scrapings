@@ -1,0 +1,7 @@
+resolver: nightly-2019-07-16
+
+packages:
+- .
+
+ghc-options:
+  "$everything": -Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -fwarn-incomplete-patterns
