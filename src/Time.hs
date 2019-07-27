@@ -13,14 +13,14 @@ data Time m a where
 
 makeSem ''Time
 
-interpretTimeIO :: Member (Lift IO) r => Sem (Time ': r) a -> Sem r a
+interpretTimeIO :: Member (Embed IO) r => Sem (Time ': r) a -> Sem r a
 interpretTimeIO = 
     interpret 
         (\case
-            GetTime -> sendM $ getCurrentTime)
+            GetTime -> embed $ getCurrentTime)
 
 interpretTimePure :: Members '[Input UTCTime] r => [UTCTime] -> Sem (Time ': r) a -> Sem r a
 interpretTimePure i =
-    runListInput i . reinterpret
+    runInputList i . reinterpret
         (\case
             GetTime -> id <$> input)

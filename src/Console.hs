@@ -16,16 +16,16 @@ data Console m a where
 
 makeSem ''Console
 
-interpretConsoleIO :: Member (Lift IO) r => Sem (Console ': r) a -> Sem r a
+interpretConsoleIO :: Member (Embed IO) r => Sem (Console ': r) a -> Sem r a
 interpretConsoleIO =
     interpret 
         (\case
-            GetLine -> sendM $ pack <$> SysIO.getLine
-            PutTextLn msg -> sendM $ putStrLn (unpack msg))
+            GetLine -> embed $ pack <$> SysIO.getLine
+            PutTextLn msg -> embed $ putStrLn (unpack msg))
 
 interpretConsolePure :: Members '[Writer [Text]] r => [Text] -> Sem (Console ': r) a -> Sem r a
 interpretConsolePure i =
-    runListInput i . reinterpret
+    runInputList i . reinterpret
         (\case
             PutTextLn msg -> tell [msg]
             GetLine -> maybe "" id <$> input)

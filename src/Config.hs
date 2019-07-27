@@ -17,17 +17,17 @@ data Config m a where
 
 makeSem ''Config
 
-interpretConfigIO :: Member (Lift IO) r => Sem (Config ': r) a -> Sem r a
+interpretConfigIO :: Member (Embed IO) r => Sem (Config ': r) a -> Sem r a
 interpretConfigIO =
     interpret 
         (\case
-            GetConfig id_ -> sendM $ do
+            GetConfig id_ -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ runSelectReturningOne $ select $ do
                     entry <- all_ (_config cheezyScrapingsDb)
                     guard_ (_configId entry ==. val_ id_)
                     pure entry
-            UpdateConfig config -> sendM $ do
+            UpdateConfig config -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ do
                     Just _ <- runSelectReturningOne $ lookup_ (_config cheezyScrapingsDb) (ConfigEntryId $ _configId config)

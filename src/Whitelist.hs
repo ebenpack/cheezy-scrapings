@@ -19,17 +19,17 @@ data Whitelist m a where
 
 makeSem ''Whitelist
 
-interpretWhitelistIO :: Member (Lift IO) r => Sem (Whitelist ': r) a -> Sem r a
+interpretWhitelistIO :: Member (Embed IO) r => Sem (Whitelist ': r) a -> Sem r a
 interpretWhitelistIO =
     interpret 
         (\case
-            GetWhitelist txt -> sendM $ do
+            GetWhitelist txt -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ runSelectReturningOne $ select $ do
                     entry <- all_ (_whitelist cheezyScrapingsDb)
                     guard_ (_whitelistEntry entry ==. val_ txt)
                     pure entry
-            InsertWhitelist txt -> sendM $ do
+            InsertWhitelist txt -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ runInsert $ insert (_whitelist cheezyScrapingsDb) $
                     insertExpressions [ WhitelistEntry (val_ txt) default_ ]

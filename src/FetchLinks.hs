@@ -60,7 +60,7 @@ allComments path = do
 
 makeSem ''FetchLinks
 
-interpretRequestIO :: Members '[Lift IO, Error NetworkError] r
+interpretRequestIO :: Members '[Embed IO, Error NetworkError] r
   => Sem (FetchLinks ': r) a
   -> Sem r a
 interpretRequestIO =
