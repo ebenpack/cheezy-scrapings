@@ -95,16 +95,17 @@ scrapeItCheezy = do
             Just end -> pure $ page > (end + extras) || page > max
     printHits :: Members '[Console, State ProgramConfig] r => Sem r ()
     printHits = do
-        config <- get
         putTextLn "---------------------"
         putTextLn "Hits:"
+        config <- get
         let allHits = uniqueHits (hits config)
-        forM_ allHits putTextLn
+        let hitPrinter = \(name, ep) -> putTextLn $ concat [name, maybe "" (append " - ") ep]
+        forM_ allHits hitPrinter
         putTextLn "---------------------"
     processMaybeHits :: Members '[Console, Config, Blacklist, Whitelist, Time, State ProgramConfig] r => Sem r ()
     processMaybeHits = do
         uniqueMaybes <- getConfigBy $ uniqueHits . maybeHits
-        forM_ uniqueMaybes hitDecider
+        forM_ (foldr (\a b -> insert (fst a) b) empty uniqueMaybes) hitDecider
         configEntry' <- getConfigBy configEntry
         lastIndexed' <- getConfigBy lastIndexed
         case (configEntry', lastIndexed') of
@@ -154,9 +155,11 @@ scrapeItCheezy = do
         case (configEntry', lastIndexedUrl) of
             (Just ce, Just li) -> updateConfig (ce { _configLastIndexedTime = t, _configLastIndexedLink = li })
             _ -> pure ()
-    uniqueHits :: Set Link -> Set Text
-    uniqueHits = foldr (\link links -> insert (showName link) links) empty
-
+    uniqueHits :: Set Link -> Set (Text, Maybe Text)
+    uniqueHits = foldr (\link links ->
+        let episodeNumber = episode link
+            episodeName = showName link
+        in insert (episodeName, episodeNumber) links) empty
 
 runCheezyScrapingsIO :: IO (Either NetworkError (ProgramConfig, ()))
 runCheezyScrapingsIO
