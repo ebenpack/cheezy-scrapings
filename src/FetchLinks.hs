@@ -18,7 +18,8 @@ data FetchLinks m r where
 
 data Link = Link 
     { showName :: Text
-    , episode :: Maybe Text, href :: Text 
+    , episode :: Maybe Text
+    , href :: Text 
     } deriving (Show, Eq, Ord)
 
 parseLink :: Text -> Text -> Link
