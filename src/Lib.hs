@@ -45,8 +45,8 @@ scrapeItCheezy = do
     modify (\s -> s { configEntry = dbConfig})
     printLastRunTime
     _ <- processPage `untilM` doneProcessing
-    printHits
     processMaybeHits
+    printHits
     saveConfig
     where
     url :: Int -> String
@@ -99,11 +99,13 @@ scrapeItCheezy = do
         putTextLn "Hits:"
         config <- get
         let allHits = uniqueHits (hits config)
-        let hitPrinter = \(name, ep) -> putTextLn $ concat [name, maybe "" (append " - ") ep]
         forM_ allHits hitPrinter
-        putTextLn "---------------------"
+        where
+        hitPrinter :: Members '[Console] r => (Text, Maybe Text) -> Sem r ()
+        hitPrinter (name, ep) = putTextLn $ concat [name, maybe "" (append " - ") ep]
     processMaybeHits :: Members '[Console, Config, Blacklist, Whitelist, Time, State ProgramConfig] r => Sem r ()
     processMaybeHits = do
+        putTextLn "---------------------"
         uniqueMaybes <- getConfigBy $ uniqueHits . maybeHits
         forM_ (foldr (\a b -> insert (fst a) b) empty uniqueMaybes) hitDecider
         configEntry' <- getConfigBy configEntry
