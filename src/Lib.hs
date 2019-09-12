@@ -165,7 +165,9 @@ scrapeItCheezy = do
 
 runCheezyScrapingsIO :: IO (Either NetworkError (ProgramConfig, ()))
 runCheezyScrapingsIO
-    = (runM .@@ lowerError @NetworkError)
+    = runFinal
+    . embedToFinal @IO
+    . errorToIOFinal @NetworkError
     . (runState initialState)
     . interpretConsoleIO
     . interpretRequestIO
