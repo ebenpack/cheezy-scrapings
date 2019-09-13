@@ -25,12 +25,14 @@ interpretWhitelistIO =
         (\case
             GetWhitelist txt -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
-                runBeamSqlite conn $ runSelectReturningOne $ select $ do
+                result <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
                     entry <- all_ (_whitelist cheezyScrapingsDb)
                     guard_ (_whitelistEntry entry ==. val_ txt)
                     pure entry
+                close conn
+                pure result
             InsertWhitelist txt -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ runInsert $ insert (_whitelist cheezyScrapingsDb) $
                     insertExpressions [ WhitelistEntry (val_ txt) default_ ]
-                pure ())
+                close conn)

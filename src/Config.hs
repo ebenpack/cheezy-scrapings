@@ -23,13 +23,15 @@ interpretConfigIO =
         (\case
             GetConfig id_ -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
-                runBeamSqlite conn $ runSelectReturningOne $ select $ do
+                result <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
                     entry <- all_ (_config cheezyScrapingsDb)
                     guard_ (_configId entry ==. val_ id_)
                     pure entry
+                close conn
+                pure result
             UpdateConfig config -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ do
                     Just _ <- runSelectReturningOne $ lookup_ (_config cheezyScrapingsDb) (ConfigEntryId $ _configId config)
                     runUpdate $ save (_config cheezyScrapingsDb) $ config
-                pure ())
+                close conn)

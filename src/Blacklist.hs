@@ -25,12 +25,14 @@ interpretBlacklistIO =
         (\case
             GetBlacklist txt -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
-                runBeamSqlite conn $ runSelectReturningOne $ select $ do
+                result <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
                     entry <- all_ (_blacklist cheezyScrapingsDb)
                     guard_ (_blacklistEntry entry ==. val_ txt)
                     pure entry
+                close conn
+                pure result
             InsertBlacklist txt -> embed $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ runInsert $ insert (_blacklist cheezyScrapingsDb) $
                     insertExpressions [ BlacklistEntry (val_ txt) default_ ]
-                pure ())
+                close conn)
