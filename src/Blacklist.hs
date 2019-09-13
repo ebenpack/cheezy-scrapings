@@ -19,11 +19,11 @@ data Blacklist m a where
 
 makeSem ''Blacklist
 
-interpretBlacklistIO :: Member (Embed IO) r => Sem (Blacklist ': r) a -> Sem r a
+interpretBlacklistIO :: Member (Final IO) r => Sem (Blacklist ': r) a -> Sem r a
 interpretBlacklistIO =
     interpret 
         (\case
-            GetBlacklist txt -> embed $ do
+            GetBlacklist txt -> embedFinal $ do
                 conn <- open "./cheezy-scrapings.db"
                 result <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
                     entry <- all_ (_blacklist cheezyScrapingsDb)
@@ -31,7 +31,7 @@ interpretBlacklistIO =
                     pure entry
                 close conn
                 pure result
-            InsertBlacklist txt -> embed $ do
+            InsertBlacklist txt -> embedFinal $ do
                 conn <- open "./cheezy-scrapings.db"
                 runBeamSqlite conn $ runInsert $ insert (_blacklist cheezyScrapingsDb) $
                     insertExpressions [ BlacklistEntry (val_ txt) default_ ]
